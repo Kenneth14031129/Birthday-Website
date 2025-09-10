@@ -9,6 +9,10 @@ interface CandleProps {
   isLit: boolean
 }
 
+interface BirthdayCakeProps {
+  onAllCandlesBlown?: () => void
+}
+
 function Candle({ position, isLit }: CandleProps) {
   const flameGroupRef = useRef<THREE.Group>(null)
   const flame1Ref = useRef<THREE.Mesh>(null)
@@ -164,7 +168,7 @@ useFrame((state) => {
   )
 }
 
-export default function BirthdayCake() {
+export default function BirthdayCake({ onAllCandlesBlown }: BirthdayCakeProps = {}) {
   const cakeRef = useRef<THREE.Group>(null)
   const [candlesLit, setCandlesLit] = useState<boolean[]>([true, true, true, true, true])
   const { startListening, isListening, isBlowing } = useAudioDetection({
@@ -190,11 +194,18 @@ export default function BirthdayCake() {
       }, index * 200)
     })
     
-    // Reset after 3 seconds
+    // Trigger universe transition after all candles are blown out
+    setTimeout(() => {
+      if (onAllCandlesBlown) {
+        onAllCandlesBlown()
+      }
+    }, 2000) // Wait 2 seconds after all candles are blown out
+    
+    // Reset after 5 seconds (extended to allow transition)
     setTimeout(() => {
       setCandlesLit([true, true, true, true, true])
-    }, 3000)
-  }, [candlesLit])
+    }, 5000)
+  }, [candlesLit, onAllCandlesBlown])
 
   // Start microphone listening on component mount
   useEffect(() => {
