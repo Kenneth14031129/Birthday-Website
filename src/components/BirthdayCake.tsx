@@ -196,16 +196,17 @@ export default function BirthdayCake({ onAllCandlesBlown }: BirthdayCakeProps = 
     
     // Trigger universe transition after all candles are blown out
     setTimeout(() => {
+      console.log('Calling onAllCandlesBlown callback')
       if (onAllCandlesBlown) {
         onAllCandlesBlown()
       }
-    }, 2000) // Wait 2 seconds after all candles are blown out
+    }, 1000) // Reduced to 1 second
     
-    // Reset after 5 seconds (extended to allow transition)
+    // Reset after longer time to allow transition
     setTimeout(() => {
       setCandlesLit([true, true, true, true, true])
-    }, 5000)
-  }, [candlesLit, onAllCandlesBlown])
+    }, 8000) // Extended to 8 seconds
+  }, [onAllCandlesBlown])
 
   // Start microphone listening on component mount
   useEffect(() => {

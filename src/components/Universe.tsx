@@ -82,7 +82,6 @@ const universes: UniverseData[] = [
 
 export default function Universe() {
   const [selectedUniverse, setSelectedUniverse] = useState<UniverseData | null>(null)
-  const [time, setTime] = useState(0)
   const [stars, setStars] = useState<Array<{
     id: number
     x: number
@@ -190,7 +189,18 @@ export default function Universe() {
 
   // Create gravitational particle streams between planets
   useEffect(() => {
-    const streams = []
+    const streams: Array<{
+      id: number
+      fromPlanet: number
+      toPlanet: number
+      particles: Array<{
+        x: number
+        y: number
+        progress: number
+        color: string
+        size: number
+      }>
+    }> = []
     
     // Create connections between nearby planets
     const connections = [
@@ -360,7 +370,7 @@ export default function Universe() {
         {/* Moons */}
         {universe.moons && universe.moons > 0 && (
           <>
-            {Array.from({ length: universe.moons }, (_, i) => {
+            {Array.from({ length: universe.moons || 0 }, (_, i) => {
               const moonAngle = (i * 2 * Math.PI) / universe.moons
               const moonDistance = universe.size * 0.8 + i * 10
               const moonX = Math.cos(moonAngle) * moonDistance
@@ -594,7 +604,7 @@ export default function Universe() {
       )}
 
       {/* CSS Animations */}
-      <style jsx>{`
+      <style>{`
         @keyframes starTwinkle {
           0% { opacity: 0.3; transform: scale(0.8); }
           100% { opacity: 1; transform: scale(1.2); }
@@ -645,7 +655,7 @@ export default function Universe() {
           100% { transform: rotate(360deg) scale(1); }
         }
         
-        ${universes.map((universe, index) => 
+        ${universes.map((universe) => 
           Array.from({ length: universe.moons || 0 }, (_, moonIndex) => `
             @keyframes orbit${moonIndex} {
               0% { transform: translate(-50%, -50%) rotate(0deg) translateX(${universe.size * 0.8 + moonIndex * 10}px) rotate(0deg); }

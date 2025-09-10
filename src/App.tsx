@@ -14,17 +14,25 @@ function App() {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const audioRef = useRef<HTMLVideoElement>(null)
 
+  // Debug state changes
+  useEffect(() => {
+    console.log('State update:', { showWelcome, showUniverse, isTransitioning })
+  }, [showWelcome, showUniverse, isTransitioning])
+
   const handleWelcomeComplete = () => {
     setShowWelcome(false)
   }
 
   const handleUniverseTransition = () => {
+    console.log('Universe transition started')
     setIsTransitioning(true)
-    // Wait for star transition effect, then show universe
+    
+    // Show universe after star transition
     setTimeout(() => {
+      console.log('Showing universe after transition')
       setShowUniverse(true)
       setIsTransitioning(false)
-    }, 3000) // 3 second star transition
+    }, 2500) // 2.5 second transition
   }
 
   // Initialize and try to start music immediately when page loads
@@ -38,7 +46,7 @@ function App() {
         try {
           await audioRef.current.play()
           console.log('Music started immediately on page load!')
-        } catch (error) {
+        } catch {
           console.log('Autoplay blocked on page load - will try during countdown')
         }
       }
@@ -98,7 +106,7 @@ function App() {
 
       {/* HTML Overlay for welcome sequence */}
       {showWelcome && (
-        <WelcomeOverlay onComplete={handleWelcomeComplete} audioRef={audioRef} />
+        <WelcomeOverlay onComplete={handleWelcomeComplete} audioRef={audioRef as React.RefObject<HTMLVideoElement>} />
       )}
       
       {!showWelcome && !showUniverse && !isTransitioning && (

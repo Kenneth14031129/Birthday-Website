@@ -5,54 +5,14 @@ interface StarTransitionProps {
 }
 
 export default function StarTransition({ isActive }: StarTransitionProps) {
-  const [stars, setStars] = useState<Array<{
-    id: number
-    x: number
-    y: number
-    size: number
-    opacity: number
-    color: string
-    delay: number
-  }>>([])
-
   useEffect(() => {
-    if (isActive) {
-      // Create stars for transition
-      const newStars = []
-      for (let i = 0; i < 200; i++) {
-        newStars.push({
-          id: i,
-          x: Math.random() * window.innerWidth,
-          y: Math.random() * window.innerHeight,
-          size: Math.random() * 4 + 1,
-          opacity: 0,
-          color: ['#ffffff', '#fbbf24', '#8b5cf6', '#06b6d4', '#ec4899'][Math.floor(Math.random() * 5)],
-          delay: Math.random() * 2000 // Random delay up to 2 seconds
-        })
-      }
-      setStars(newStars)
-    }
+    console.log('StarTransition isActive changed:', isActive)
   }, [isActive])
-
-  useEffect(() => {
-    if (isActive && stars.length > 0) {
-      // Animate stars appearing
-      stars.forEach(star => {
-        setTimeout(() => {
-          setStars(prevStars =>
-            prevStars.map(s =>
-              s.id === star.id ? { ...s, opacity: 1 } : s
-            )
-          )
-        }, star.delay)
-      })
-    }
-  }, [isActive, stars.length])
 
   if (!isActive) return null
 
   return (
-    <div className="fixed inset-0 bg-black z-40 transition-all duration-1000">
+    <div className="fixed inset-0 bg-black z-40 transition-all duration-1000" style={{ pointerEvents: 'none' }}>
       {/* Gradient overlay that fades in */}
       <div 
         className="absolute inset-0 transition-opacity duration-2000"
@@ -62,23 +22,24 @@ export default function StarTransition({ isActive }: StarTransitionProps) {
         }}
       />
       
-      {/* Stars */}
-      {stars.map(star => (
-        <div
-          key={star.id}
-          className="absolute rounded-full transition-all duration-1000 ease-out"
-          style={{
-            left: star.x,
-            top: star.y,
-            width: star.size,
-            height: star.size,
-            backgroundColor: star.color,
-            opacity: star.opacity,
-            boxShadow: `0 0 ${star.size * 3}px ${star.color}`,
-            animation: star.opacity > 0 ? 'starPulse 2s ease-in-out infinite' : 'none'
-          }}
-        />
-      ))}
+      {/* Simplified star effect */}
+      <div className="absolute inset-0">
+        {Array.from({ length: 50 }, (_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full animate-pulse"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              width: Math.random() * 4 + 2,
+              height: Math.random() * 4 + 2,
+              backgroundColor: '#ffffff',
+              opacity: Math.random() * 0.8 + 0.2,
+              animationDelay: `${Math.random() * 2}s`
+            }}
+          />
+        ))}
+      </div>
 
       {/* Central message */}
       <div className="absolute inset-0 flex items-center justify-center">
@@ -104,7 +65,7 @@ export default function StarTransition({ isActive }: StarTransitionProps) {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes starPulse {
           0%, 100% { 
             opacity: 0.5; 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 export default function ContinuousFireworks() {
   const [fireworks, setFireworks] = useState<Array<{
@@ -25,7 +25,7 @@ export default function ContinuousFireworks() {
   }>>([])
   
   // Create a shooting star firework - ALL fireworks are now shooting stars
-  const createFirework = () => {
+  const createFirework = useCallback(() => {
     const types = ['chrysanthemum', 'willow', 'peony', 'palm', 'crossette'] as const
     const type = types[Math.floor(Math.random() * types.length)]
     
@@ -39,7 +39,7 @@ export default function ContinuousFireworks() {
     
     const x = startX
     const y = startY
-    const phase = 'traveling'
+    const phase = 'traveling' as const
     
     const colorSets = [
       ['#ff69b4', '#ff8fab', '#ffb3c6'], // Pink gradient
@@ -71,7 +71,7 @@ export default function ContinuousFireworks() {
     }
     
     setFireworks(prev => [...prev, newFirework])
-  }
+  }, [])
 
   // Create shooting star trail particles - vertical trail
   const createShootingStarParticles = (x: number, y: number, colors: string[]) => {
@@ -117,7 +117,7 @@ export default function ContinuousFireworks() {
       let vx, vy, color, size, maxOpacity
       
       switch (type) {
-        case 'chrysanthemum':
+        case 'chrysanthemum': {
           // Perfect sphere pattern
           const angle = (Math.PI * 2 * i) / particleCount
           const radius = 4 + Math.random() * 3
@@ -127,8 +127,9 @@ export default function ContinuousFireworks() {
           size = 4 + Math.random() * 4
           maxOpacity = 1
           break
+        }
           
-        case 'willow':
+        case 'willow': {
           // Drooping willow effect
           const wAngle = (Math.PI * 2 * i) / particleCount
           const wRadius = 3 + Math.random() * 2
@@ -138,8 +139,9 @@ export default function ContinuousFireworks() {
           size = 3 + Math.random() * 3
           maxOpacity = 0.9
           break
+        }
           
-        case 'peony':
+        case 'peony': {
           // Dense, round burst
           const pAngle = Math.random() * Math.PI * 2
           const pRadius = Math.random() * 4 + 2
@@ -149,8 +151,9 @@ export default function ContinuousFireworks() {
           size = 5 + Math.random() * 3
           maxOpacity = 1
           break
+        }
           
-        case 'palm':
+        case 'palm': {
           // Few large streaks going up
           const palmAngle = (Math.PI * 2 * i) / particleCount
           const palmRadius = 3 + Math.random() * 4
@@ -160,8 +163,9 @@ export default function ContinuousFireworks() {
           size = 6 + Math.random() * 4
           maxOpacity = 1
           break
+        }
           
-        case 'crossette':
+        case 'crossette': {
           // Multiple smaller bursts
           const cAngle = (Math.PI * 2 * i) / (particleCount / 5)
           const cRadius = 2 + Math.random() * 3
@@ -171,6 +175,7 @@ export default function ContinuousFireworks() {
           size = 3 + Math.random() * 2
           maxOpacity = 0.8
           break
+        }
           
         default:
           vx = (Math.random() - 0.5) * 8
@@ -209,7 +214,7 @@ export default function ContinuousFireworks() {
               const explosionParticles = createExplosionParticles('chrysanthemum', firework.targetX!, firework.targetY!, ['#ff69b4', '#ff8fab', '#ffb3c6'])
               return {
                 ...firework,
-                phase: 'exploding',
+                phase: 'exploding' as const,
                 x: firework.targetX!,
                 y: firework.targetY!,
                 particles: explosionParticles,
@@ -301,7 +306,7 @@ export default function ContinuousFireworks() {
     }, 1000 + Math.random() * 1000)
     
     return () => clearInterval(interval)
-  }, [])
+  }, [createFirework])
 
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none z-10">

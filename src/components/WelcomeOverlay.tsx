@@ -1,4 +1,4 @@
-import { useState, useEffect, RefObject } from 'react'
+import { useState, useEffect, type RefObject } from 'react'
 
 interface WelcomeOverlayProps {
   onComplete: () => void
@@ -16,7 +16,7 @@ export default function WelcomeOverlay({ onComplete, audioRef }: WelcomeOverlayP
         try {
           await audioRef.current.play()
           console.log('Music started early in WelcomeOverlay!')
-        } catch (error) {
+        } catch {
           console.log('Early music start blocked, will retry')
           
           // Set up listener for any interaction to start music
@@ -59,7 +59,7 @@ export default function WelcomeOverlay({ onComplete, audioRef }: WelcomeOverlayP
           try {
             await audioRef.current.play()
             console.log('Background music started during countdown!')
-          } catch (error) {
+          } catch {
             console.log('Autoplay blocked, trying alternative methods')
             
             // Force play on any interaction during countdown
