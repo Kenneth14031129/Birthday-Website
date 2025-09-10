@@ -35,38 +35,38 @@ function App() {
     }, 2500) // 2.5 second transition
   }
 
-  // Background music disabled for better microphone detection
-  // useEffect(() => {
-  //   const initializeMusic = async () => {
-  //     if (audioRef.current) {
-  //       // Set volume
-  //       audioRef.current.volume = 0.3
-  //       
-  //       // Try to start music immediately on page load
-  //       try {
-  //         await audioRef.current.play()
-  //         console.log('Music started immediately on page load!')
-  //       } catch {
-  //         console.log('Autoplay blocked on page load - will try during countdown')
-  //       }
-  //     }
-  //   }
-  //   
-  //   // Try immediately
-  //   initializeMusic()
-  //   
-  //   // Also try when DOM is fully loaded
-  //   if (document.readyState === 'loading') {
-  //     document.addEventListener('DOMContentLoaded', initializeMusic)
-  //   }
-  // }, [])
+  // Initialize and try to start music immediately when page loads
+  useEffect(() => {
+    const initializeMusic = async () => {
+      if (audioRef.current) {
+        // Set volume
+        audioRef.current.volume = 0.3
+        
+        // Try to start music immediately on page load
+        try {
+          await audioRef.current.play()
+          console.log('Music started immediately on page load!')
+        } catch {
+          console.log('Autoplay blocked on page load - will try during countdown')
+        }
+      }
+    }
+    
+    // Try immediately
+    initializeMusic()
+    
+    // Also try when DOM is fully loaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeMusic)
+    }
+  }, [])
 
   return (
     <div className="w-full h-screen bg-black relative overflow-hidden">
       <div className="absolute inset-0 galaxy-background"></div>
       
-      {/* Background Music - Disabled for better microphone detection */}
-      {/* <video
+      {/* Background Music - Invisible Video */}
+      <video
         ref={audioRef}
         loop
         muted={false}
@@ -87,7 +87,7 @@ function App() {
       >
         <source src="/music/16397683-6878-466c-9fda-541ce52464a3.mp4" type="video/mp4" />
         Your browser does not support the video element.
-      </video> */}
+      </video>
       
       {/* Continuous fireworks - only visible when not in universe */}
       {!showUniverse && <ContinuousFireworks />}
