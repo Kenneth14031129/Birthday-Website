@@ -24,32 +24,22 @@ export default function ContinuousFireworks() {
     travelProgress?: number
   }>>([])
   
-  // Create a firework explosion directly
+  // Create a shooting star firework - ALL fireworks are now shooting stars
   const createFirework = () => {
-    const types = ['chrysanthemum', 'willow', 'peony', 'palm', 'crossette', 'shooting-star'] as const
+    const types = ['chrysanthemum', 'willow', 'peony', 'palm', 'crossette'] as const
     const type = types[Math.floor(Math.random() * types.length)]
     
-    let x, y, targetX, targetY, startX, startY, phase
+    // ALL fireworks are shooting stars now - start from bottom and travel vertically
+    const startX = Math.random() * window.innerWidth
+    const startY = window.innerHeight + 50  // Start below screen
     
-    if (type === 'shooting-star') {
-      // Start from bottom of screen and travel to explosion point
-      startX = Math.random() * window.innerWidth
-      startY = window.innerHeight + 50
-      
-      // Target explosion point
-      targetX = Math.random() * (window.innerWidth - 200) + 100
-      targetY = Math.random() * (window.innerHeight * 0.5) + 100
-      
-      // Start at launch position
-      x = startX
-      y = startY
-      phase = 'traveling'
-    } else {
-      // Regular firework - explode immediately at random position
-      x = Math.random() * (window.innerWidth - 200) + 100
-      y = Math.random() * (window.innerHeight * 0.5) + 100
-      phase = 'exploding'
-    }
+    // Target explosion point - straight up from launch position (vertical)
+    const targetX = startX + (Math.random() - 0.5) * 100  // Slight horizontal drift
+    const targetY = Math.random() * (window.innerHeight * 0.4) + 50  // Upper portion of screen
+    
+    const x = startX
+    const y = startY
+    const phase = 'traveling'
     
     const colorSets = [
       ['#ff69b4', '#ff8fab', '#ffb3c6'], // Pink gradient
@@ -63,9 +53,8 @@ export default function ContinuousFireworks() {
     ]
     const colors = colorSets[Math.floor(Math.random() * colorSets.length)]
     
-    const particles = type === 'shooting-star' && phase === 'traveling' 
-      ? createShootingStarParticles(x, y, colors)
-      : createExplosionParticles(type, x, y, colors)
+    // All fireworks start as shooting stars with trail particles
+    const particles = createShootingStarParticles(x, y, colors)
     
     const newFirework = {
       id: Date.now() + Math.random(),
@@ -84,11 +73,11 @@ export default function ContinuousFireworks() {
     setFireworks(prev => [...prev, newFirework])
   }
 
-  // Create shooting star trail particles
+  // Create shooting star trail particles - vertical trail
   const createShootingStarParticles = (x: number, y: number, colors: string[]) => {
     const particles = []
     
-    // Main shooting star particle
+    // Main shooting star particle (bright head)
     particles.push({
       x,
       y,
@@ -96,21 +85,21 @@ export default function ContinuousFireworks() {
       vy: 0,
       color: colors[0],
       opacity: 1,
-      size: 8,
+      size: 10,
       maxOpacity: 1
     })
     
-    // Trail particles
-    for (let i = 1; i <= 8; i++) {
+    // Vertical trail particles behind the main particle
+    for (let i = 1; i <= 12; i++) {
       particles.push({
-        x: x,
-        y: y + (i * 8), // trail behind the main particle (vertically down since moving up)
+        x: x + (Math.random() - 0.5) * 3, // Slight horizontal randomness
+        y: y + (i * 6), // Vertical trail going down (since rocket moves up)
         vx: 0,
         vy: 0,
         color: colors[i % colors.length],
-        opacity: 1 - (i * 0.12),
-        size: Math.max(2, 7 - (i * 0.8)),
-        maxOpacity: 1 - (i * 0.12)
+        opacity: Math.max(0.1, 1 - (i * 0.08)),
+        size: Math.max(2, 9 - (i * 0.6)),
+        maxOpacity: Math.max(0.1, 1 - (i * 0.08))
       })
     }
     
@@ -211,7 +200,7 @@ export default function ContinuousFireworks() {
     const interval = setInterval(() => {
       setFireworks(prev => 
         prev.map(firework => {
-          if (firework.type === 'shooting-star' && firework.phase === 'traveling') {
+          if (firework.phase === 'traveling') {
             // Animate shooting star movement
             const travelProgress = (firework.travelProgress || 0) + 0.008
             

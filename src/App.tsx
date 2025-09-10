@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import BirthdayCake from './components/BirthdayCake'
@@ -12,6 +12,7 @@ function App() {
   const [showWelcome, setShowWelcome] = useState(true)
   const [showUniverse, setShowUniverse] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const audioRef = useRef<HTMLVideoElement>(null)
 
   const handleWelcomeComplete = () => {
     setShowWelcome(false)
@@ -26,9 +27,59 @@ function App() {
     }, 3000) // 3 second star transition
   }
 
+  // Initialize and try to start music immediately when page loads
+  useEffect(() => {
+    const initializeMusic = async () => {
+      if (audioRef.current) {
+        // Set volume
+        audioRef.current.volume = 0.3
+        
+        // Try to start music immediately on page load
+        try {
+          await audioRef.current.play()
+          console.log('Music started immediately on page load!')
+        } catch (error) {
+          console.log('Autoplay blocked on page load - will try during countdown')
+        }
+      }
+    }
+    
+    // Try immediately
+    initializeMusic()
+    
+    // Also try when DOM is fully loaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeMusic)
+    }
+  }, [])
+
   return (
     <div className="w-full h-screen bg-black relative overflow-hidden">
       <div className="absolute inset-0 galaxy-background"></div>
+      
+      {/* Background Music - Invisible Video */}
+      <video
+        ref={audioRef}
+        loop
+        muted={false}
+        preload="auto"
+        playsInline
+        onLoadedData={() => console.log('Video loaded and ready to play')}
+        onPlay={() => console.log('Music started playing!')}
+        onPause={() => console.log('Music paused')}
+        onError={(e) => console.log('Video error:', e)}
+        style={{ 
+          display: 'none',
+          position: 'absolute',
+          width: '1px',
+          height: '1px',
+          opacity: 0,
+          pointerEvents: 'none'
+        }}
+      >
+        <source src="/music/16397683-6878-466c-9fda-541ce52464a3.mp4" type="video/mp4" />
+        Your browser does not support the video element.
+      </video>
       
       {/* Continuous fireworks - only visible when not in universe */}
       {!showUniverse && <ContinuousFireworks />}
@@ -47,7 +98,7 @@ function App() {
 
       {/* HTML Overlay for welcome sequence */}
       {showWelcome && (
-        <WelcomeOverlay onComplete={handleWelcomeComplete} />
+        <WelcomeOverlay onComplete={handleWelcomeComplete} audioRef={audioRef} />
       )}
       
       {!showWelcome && !showUniverse && !isTransitioning && (

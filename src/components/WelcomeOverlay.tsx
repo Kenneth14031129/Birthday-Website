@@ -1,12 +1,46 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, RefObject } from 'react'
 
 interface WelcomeOverlayProps {
   onComplete: () => void
+  audioRef: RefObject<HTMLVideoElement>
 }
 
-export default function WelcomeOverlay({ onComplete }: WelcomeOverlayProps) {
+export default function WelcomeOverlay({ onComplete, audioRef }: WelcomeOverlayProps) {
   const [phase, setPhase] = useState<'fireworks' | 'countdown' | 'message' | 'date' | 'complete'>('fireworks')
   const [countdown, setCountdown] = useState(3)
+
+  // Try to start music immediately when WelcomeOverlay mounts (right at the beginning)
+  useEffect(() => {
+    const startMusicEarly = async () => {
+      if (audioRef.current) {
+        try {
+          await audioRef.current.play()
+          console.log('Music started early in WelcomeOverlay!')
+        } catch (error) {
+          console.log('Early music start blocked, will retry')
+          
+          // Set up listener for any interaction to start music
+          const startOnInteraction = async () => {
+            try {
+              await audioRef.current?.play()
+              console.log('Music started on interaction!')
+              document.removeEventListener('click', startOnInteraction)
+              document.removeEventListener('touchstart', startOnInteraction)
+              document.removeEventListener('keydown', startOnInteraction)
+            } catch (err) {
+              console.log('Failed to start music on interaction:', err)
+            }
+          }
+          
+          document.addEventListener('click', startOnInteraction)
+          document.addEventListener('touchstart', startOnInteraction) 
+          document.addEventListener('keydown', startOnInteraction)
+        }
+      }
+    }
+    
+    startMusicEarly()
+  }, [audioRef])
 
   useEffect(() => {
     // Start countdown after fireworks display time
@@ -19,6 +53,40 @@ export default function WelcomeOverlay({ onComplete }: WelcomeOverlayProps) {
 
   useEffect(() => {
     if (phase === 'countdown') {
+      // Start background music when countdown begins
+      const startBackgroundMusic = async () => {
+        if (audioRef.current) {
+          try {
+            await audioRef.current.play()
+            console.log('Background music started during countdown!')
+          } catch (error) {
+            console.log('Autoplay blocked, trying alternative methods')
+            
+            // Force play on any interaction during countdown
+            const forceStart = async () => {
+              try {
+                await audioRef.current?.play()
+                document.removeEventListener('click', forceStart)
+                document.removeEventListener('touchstart', forceStart)
+                document.removeEventListener('keydown', forceStart)
+                document.removeEventListener('mousemove', forceStart)
+                console.log('Background music started on user interaction during countdown')
+              } catch (err) {
+                console.log('Could not start music:', err)
+              }
+            }
+            
+            // Listen for any user interaction
+            document.addEventListener('click', forceStart)
+            document.addEventListener('touchstart', forceStart)
+            document.addEventListener('keydown', forceStart)
+            document.addEventListener('mousemove', forceStart)
+          }
+        }
+      }
+      
+      startBackgroundMusic()
+      
       const countdownInterval = setInterval(() => {
         setCountdown(prev => {
           if (prev <= 1) {
@@ -32,7 +100,7 @@ export default function WelcomeOverlay({ onComplete }: WelcomeOverlayProps) {
 
       return () => clearInterval(countdownInterval)
     }
-  }, [phase])
+  }, [phase, audioRef])
 
   useEffect(() => {
     if (phase === 'message') {
