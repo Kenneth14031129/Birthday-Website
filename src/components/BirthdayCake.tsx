@@ -171,10 +171,10 @@ useFrame((state) => {
 export default function BirthdayCake({ onAllCandlesBlown }: BirthdayCakeProps = {}) {
   const cakeRef = useRef<THREE.Group>(null)
   const [candlesLit, setCandlesLit] = useState<boolean[]>([true, true, true, true, true])
-  const { startListening, isListening, isBlowing } = useAudioDetection({
-    threshold: 0.015,
-    sensitivity: 2,
-    cooldown: 800
+  const { startListening, isListening, isBlowing, audioLevel } = useAudioDetection({
+    threshold: 0.001,    // Much lower threshold for mobile
+    sensitivity: 5,      // Much higher sensitivity 
+    cooldown: 300        // Even faster response
   })
 
   useFrame(() => {
@@ -228,7 +228,16 @@ export default function BirthdayCake({ onAllCandlesBlown }: BirthdayCakeProps = 
   }
 
   return (
-    <group ref={cakeRef} onClick={handleClick}>
+    <>
+      {/* Audio level indicator for debugging */}
+      {isListening && (
+        <mesh position={[0, 3, 0]}>
+          <boxGeometry args={[audioLevel * 10, 0.1, 0.1]} />
+          <meshBasicMaterial color={isBlowing ? "#ff0000" : "#00ff00"} />
+        </mesh>
+      )}
+      
+      <group ref={cakeRef} onClick={handleClick}>
       {/* Cake base */}
       <Cylinder args={[1.5, 1.5, 0.8]} position={[0, -0.4, 0]}>
         <meshStandardMaterial color="#047857" />
@@ -408,6 +417,7 @@ export default function BirthdayCake({ onAllCandlesBlown }: BirthdayCakeProps = 
       <Candle position={[-0.4, 0.8, 0.4]} isLit={candlesLit[2]} />
       <Candle position={[0.4, 0.8, -0.4]} isLit={candlesLit[3]} />
       <Candle position={[-0.4, 0.8, -0.4]} isLit={candlesLit[4]} />
-    </group>
+      </group>
+    </>
   )
 }

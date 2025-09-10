@@ -33,11 +33,25 @@ export function useAudioDetection(options: AudioDetectionOptions = {}) {
         const average = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length
         const normalizedLevel = average / 255
         
-        setAudioLevel(normalizedLevel)
+        // Also check low-frequency range (better for breath detection)
+        const lowFreqData = dataArray.slice(0, 50) // First 50 bins (low frequencies)
+        const lowFreqAverage = lowFreqData.reduce((sum, value) => sum + value, 0) / lowFreqData.length
+        const lowFreqNormalized = lowFreqAverage / 255
+        
+        // Use higher of the two values for better mobile detection
+        const detectionLevel = Math.max(normalizedLevel, lowFreqNormalized)
+        
+        setAudioLevel(detectionLevel)
+        
+        // Debug logging for mobile
+        if (detectionLevel > 0.001) {
+          console.log('Audio level:', detectionLevel.toFixed(4), 'Threshold needed:', (threshold * sensitivity).toFixed(4))
+        }
         
         // Detect blow (sudden increase in audio level)
         const currentTime = Date.now()
-        if (normalizedLevel > threshold * sensitivity && currentTime - lastBlowTime > cooldown) {
+        if (detectionLevel > threshold * sensitivity && currentTime - lastBlowTime > cooldown) {
+          console.log('BLOW DETECTED! Level:', detectionLevel.toFixed(4))
           setIsBlowing(true)
           lastBlowTime = currentTime
           
