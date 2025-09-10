@@ -371,7 +371,7 @@ export default function Universe() {
         {universe.moons && universe.moons > 0 && (
           <>
             {Array.from({ length: universe.moons || 0 }, (_, i) => {
-              const moonAngle = (i * 2 * Math.PI) / universe.moons
+              const moonAngle = (i * 2 * Math.PI) / (universe.moons || 1)
               const moonDistance = universe.size * 0.8 + i * 10
               const moonX = Math.cos(moonAngle) * moonDistance
               const moonY = Math.sin(moonAngle) * moonDistance
